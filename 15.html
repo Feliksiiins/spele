@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sirsninu savacejs</title>
+<style>
+body { font-family: Arial, sans-serif; max-width: 680px; margin: 24px auto; padding: 16px; line-height: 1.6; }
+button, input { font: inherit; padding: 10px; margin: 4px; }
+button { cursor: pointer; }
+img { max-width: 100%; height: auto; }
+[hidden] { display: none !important; }
+
+</style>
+</head>
+<body>
+<h1>Sirsninu savacejs</h1>
+<p>vāc sirsninas un izvairies no sliktajiem nemilosajiem zvaigzniteemm.</p>
+<section id="sakums">
+  <h2>Sākuma ekrāns</h2>
+  <h2>noteikumi</h2> 
+  <p>savac 20 sirsninas vai vairak lai uzvaretu </p>
+  <p>ja pa tevim trapis vairak neka 5 sliktajas zvaigznites, tu zaudeji</p>
+  <p>sirsnina ar slikto zvaigzni nesajiet kopā, ja savāksi abas vienlaicigi uzreiz zaudesi.</p> 
+   
+  </h2>
+  <button onclick="paraditSpeli()">Sākt spēli</button>
+</section>
+<section id="laukums" hidden>
+  <h2>Spēles ekrāns</h2>
+  <p>Punkti: 0</p>
+  <p>poga "w" ir iet uz prieksu poga "s" uz aizmuguri poga "a" uz kreiso un poga "d" uz labo. poga space ir palekties un peles kreisais klikskis ir izvairities no zvaigznes </p>
+  <p>speletajam ir ipasa speja izvairities no zvaigznes ar zobenu. ta speja kad to aktivize un izmanto, nav pieejama 30 sekundes, un tad atkal ir pieejama.</p>
+  <button onclick="paraditSakumu()">Atpakaļ</button>
+</section>
+<script>
+// Gatavā palīdzība pogām. Šodien maini lapas tekstu un izvietojumu.
+function paraditSpeli() {
+  document.getElementById("sakums").hidden = true;
+  document.getElementById("laukums").hidden = false;
+}
+function paraditSakumu() {
+  document.getElementById("sakums").hidden = false;
+  document.getElementById("laukums").hidden = true;
+}
+</script>
+</body>
+</html>
