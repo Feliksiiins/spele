@@ -1,0 +1,326 @@
+html<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainrot Flying Meme Simulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #050505;
+            color: #fff;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #gameContainer {
+            position: relative;
+            width: 900px;
+            height: 550px;
+            background: linear-gradient(135deg, #120024 0%, #000011 100%);
+            border: 5px solid #00ffff;
+            box-shadow: 0 0 30px #00ffff, inset 0 0 20px rgba(0,255,255,0.2);
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 3px 3px 0px #ff00ff, -1px -1px 0px #000;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 20;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 50px;
+            color: #ff00ff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px #ff00ff, 3px 3px 0 #00ffff;
+            letter-spacing: 3px;
+        }
+        p {
+            font-size: 20px;
+            margin-bottom: 25px;
+            font-family: Arial, sans-serif;
+            color: #ddd;
+            line-height: 1.5;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 26px;
+            font-family: 'Impact', sans-serif;
+            background: #00ffff;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #00ffff;
+            transition: 0.2s;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: #ff00ff;
+            box-shadow: 0 0 25px #ff00ff;
+            color: white;
+            transform: scale(1.05);
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <div id="ui">TOTAL AURA: <span id="scoreVal">100</span></div>
+    
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen">
+        <h1>SKIBIDI FLYER: ULTRA BRAINROT</h1>
+        <p>Move your mouse or finger UP and DOWN to glide.<br><br>
+        👑 Collect Tokens: <span style="color:#00ffaa">Sigma, Aura, Laura, Boss, Tripple T</span> (+15 Aura)<br>
+        ☣️ Avoid Slime: <span style="color:#ff0055">BRAINROT Biohazards</span> (-30 Aura & screen shake)</p>
+        <button id="startBtn">ENTER THE RIZZ ZONE</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen hidden">
+        <h1 style="color: #ff0055; text-shadow: 0 0 20px #ff0055, 3px 3px 0 #000;">⚠️ OUT OF AURA ⚠️</h1>
+        <p>You fell off + Ohio got you + Lost your streak.</p>
+        <p style="font-size: 30px;">Final Aura: <span id="finalScore" style="color:#00ffff;">0</span></p>
+        <button id="restartBtn">RESPAWN SIGMA</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = 900;
+    canvas.height = 550;
+
+    // Game Variables
+    let score = 100;
+    let gameActive = false;
+    let playerY = 275;
+    let targetY = 275;
+    let items = [];
+    let particles = [];
+    let spawnTimer = 0;
+    let gameSpeed = 6;
+    let shakeIntensity = 0;
+
+    const memePool = ['AURA', 'LAURA', 'SIGMA', 'BOSS', 'TRIPPLE T'];
+
+    // Input Listeners
+    const container = document.getElementById('gameContainer');
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        targetY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    });
+
+    container.addEventListener('touchmove', (e) => {
+        if(e.touches.length > 0) {
+            const rect = container.getBoundingClientRect();
+            targetY = ((e.touches.currentTarget.clientY - rect.top) / rect.height) * canvas.height;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    const startScreen = document.getElementById('startScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const scoreVal = document.getElementById('scoreVal');
+    const finalScore = document.getElementById('finalScore');
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('restartBtn').addEventListener('click', startGame);
+
+    function startGame() {
+        score = 100;
+        items = [];
+        particles = [];
+        gameSpeed = 6;
+        playerY = 275;
+        targetY = 275;
+        shakeIntensity = 0;
+        scoreVal.textContent = score;
+        startScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        gameActive = true;
+    }
+
+    function triggerGameOver() {
+        gameActive = false;
+        finalScore.textContent = score;
+        gameOverScreen.classList.remove('hidden');
+    }
+
+    function createBurst(x, y, color) {
+        for(let i=0; i<12; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                size: Math.random() * 6 + 3,
+                color: color,
+                alpha: 1
+            });
+        }
+    }
+
+    // Canvas Draw Helper for Skibidi Toilet Player
+    function drawSkibidiToilet(x, y) {
+        ctx.save();
+        // Toilet Bowl & Tank
+        ctx.fillStyle = "#e0e0e0"; 
+        ctx.fillRect(x - 20, y, 40, 25); // Main base bowl
+        ctx.fillRect(x - 35, y - 35, 20, 50); // Tank back
+
+        // Flush Valve
+        ctx.fillStyle = "#a0a0a0";
+        ctx.fillRect(x - 35, y - 30, 6, 8);
+
+        // Toilet Lid (Open)
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x - 15, y - 25, 6, 25);
+
+        // Inside Head (The Meme)
+        ctx.fillStyle = "#ffdcb3"; // Skin tone
+        ctx.beginPath();
+        ctx.arc(x + 5, y - 10, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair
+        ctx.fillStyle = "#4a2f13";
+        ctx.beginPath();
+        ctx.arc(x + 5, y - 20, 14, Math.PI, 0);
+        ctx.fill();
+
+        // Goofy Eyes
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(x, y - 12, 4, 0, Math.PI * 2);
+        ctx.arc(x + 10, y - 12, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(x, y - 12, 2, 0, Math.PI * 2);
+        ctx.arc(x + 10, y - 12, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Smirk Smile
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + 5, y - 6, 5, 0, Math.PI);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    // Canvas Draw Helper for GigaChad Face Token
+    function drawChadFace(x, y, size) {
+        let r = size / 2;
+        // Outer Neon Frame
+        ctx.fillStyle = "rgba(0, 255, 170, 0.25)";
+        ctx.strokeStyle = "#00ffaa";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Inside Pixel Chad Art Shape
+        ctx.fillStyle = "#555555"; // Shadow jawline tone
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y - 15);
+        ctx.lineTo(x + 10, y - 15);
+        ctx.lineTo(x + 15, y + 5);
+        ctx.lineTo(x + 8, y + 20); // Massive chin
+        ctx.lineTo(x - 8, y + 20);
+        ctx.lineTo(x - 15, y + 5);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cheekbone/Beard highlight lines
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 12, y + 5);
+        ctx.lineTo(x - 5, y + 18);
+        ctx.lineTo(x + 5, y + 18);
+        ctx.lineTo(x + 12, y + 5);
+        ctx.stroke();
+
+        // Sunglasses (Ultra Cool Sigma look)
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(x - 12, y - 10, 10, 6);
+        ctx.fillRect(x + 2, y - 10, 10, 6);
+    }
+
+    function drawStars() {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+        for(let i=0; i<30; i++) {
+            let starX = (Math.sin(i + Date.now()/800) * 450) + 450;
+            let starY = (Math.cos(i*2.5) * 275) + 275;
+            ctx.fillRect(starX, starY, 3, 3);
+        }
+    }
+
+    // Main Engine Game Loop
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Screen Shake FX
+        ctx.save();
+        if (shakeIntensity > 0) {
+            let dx = (Math.random() - 0.5) * shakeIntensity;
+            let dy = (Math.random() - 0.5) * shakeIntensity;
+            ctx.translate(dx, dy);
+            shakeIntensity *= 0.9; 
+        }
+
+        drawStars();
+
+        if (gameActive) {
+            // Smoothly track mouse position
+            playerY += (targetY - playerY) * 0.18;
+            if (playerY < 45) playerY = 45;
+            if (playerY > canvas.height - 45) playerY = canvas.height - 45;
+
+            // Render Player
+            drawSkibidiToilet(120, playerY);
