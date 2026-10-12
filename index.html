@@ -3,47 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mana spēle</title>
+<title>sigma boyz</title>
 <style>
 body { font-family: Arial, sans-serif; max-width: 680px; margin: 24px auto; padding: 16px; line-height: 1.6; }
 button, input { font: inherit; padding: 10px; margin: 4px; }
 button { cursor: pointer; }
 img { max-width: 100%; height: auto; }
 [hidden] { display: none !important; }
+
 </style>
 </head>
 <body>
-
-<h1>Mwe</h1>
-<p>Mērķis: savākt piecas zvaigznes.</p>
-
+<h1>sigma boyz</h1>
+<p>Sakop netīro pilsētu.</p>
 <section id="sakums">
-  <h2>Sākuma ekrāns</h2>
-  <p>1. Darbība: savāc zvaigznes.</p>
-  <p>2. Uzvara: savāc piecas zvaigznes.</p>
-  <p>3. Zaudējums: ja neizdodas savākt piecas zvaigznes.</p>
+  <h2>noteikumi</h2>
+  <ul>
+    <li>tu spele par apkopeju</li>
+    <li> par sakrātiem punktiem vari pirkt uzlabojumus, lai atrak varetu vakt miskasti</li>
+    <li>punktus iegusti vacot miskasti</li>
+    <li>spele ir uzvareta kad esi iztirijis visu pilsetu.</li>
+    <li>spele ir zaudeta ja pa tevi ielido miskastes mais.</li>
+    
+  </ul>
   <button onclick="paraditSpeli()">Sākt spēli</button>
 </section>
-
 <section id="laukums" hidden>
-  <h2>Spēles ekrāns</h2>
-  <p>Punkti: 0</p>
-  <p>Vadība: izmanto peli, lai savāktu zvaigznes.</p>
-  <p>Šeit vēlāk būs spēlētājs.</p>
+  <h2>informacija</h2>
+  <p>1 savakta miskaste=5 punkti</p>
+  <p>cilvecinam jeb apkopejam bus zils apgerbs un vinam bus slota.</p>
+  <p>objekti saja pilseta ir milzigas buves un daudz daudz miskastes. apkopejs var atrast slotas un klut stipraks vai ari nopirkt uzlabojumu par punktiem</p>
   <button onclick="paraditSakumu()">Atpakaļ</button>
 </section>
-
 <script>
+// Gatavā palīdzība pogām. Šodien maini lapas tekstu un izvietojumu.
 function paraditSpeli() {
   document.getElementById("sakums").hidden = true;
   document.getElementById("laukums").hidden = false;
 }
-
 function paraditSakumu() {
   document.getElementById("sakums").hidden = false;
   document.getElementById("laukums").hidden = true;
 }
 </script>
-
 </body>
 </html>
